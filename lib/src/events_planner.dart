@@ -22,7 +22,7 @@ class EventsPlanner extends StatefulWidget {
     super.key,
     required this.controller,
     this.initialDate,
-    this.daysShowed = 3,
+    this.daysShowed = 3.0,
     this.maxPreviousDays = 365,
     this.maxNextDays = 365,
     this.heightPerMinute = 0.9,
@@ -56,7 +56,7 @@ class EventsPlanner extends StatefulWidget {
   final DateTime? initialDate;
 
   /// Number of day showing in same time
-  final int daysShowed;
+  final double daysShowed;
 
   /// max horizontal previous days scroll
   /// Null for infinite
