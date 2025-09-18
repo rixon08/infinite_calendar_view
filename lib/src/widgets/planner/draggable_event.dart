@@ -118,10 +118,15 @@ class DraggableEventWidget extends StatelessWidget {
         // find column
         var columnIndex = 0;
         var dayPosition = (releaseOffsetX % dayWidth);
+        // Adjust untuk daySeparationWidth
+        var daySeparationPadding = (plannerState?.widget.daySeparationWidth ?? 0) / 2;
+        dayPosition = dayPosition - daySeparationPadding;
+        var effectiveDayWidth = dayWidth - (daySeparationPadding * 2);
+        
         var columnsParam = plannerState?.widget.columnsParam;
         if (columnsParam != null && columnsParam.columns > 0) {
           for (var column = 0; column < columnsParam.columns; column++) {
-            var positions = columnsParam.getColumPositions(dayWidth, column);
+            var positions = columnsParam.getColumPositions(effectiveDayWidth, column);
             if (positions[0] <= dayPosition && dayPosition <= positions[1]) {
               columnIndex = column;
             }
