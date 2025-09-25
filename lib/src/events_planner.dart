@@ -254,7 +254,21 @@ class EventsPlannerState extends State<EventsPlanner> {
       }
 
       // Delayed horizontal scroll
-      if (widget.delayedHorizontalScroll && widget.initialHorizontalScrollOffset != 0) {
+      // Use more robust comparison for floating point numbers
+      final isOffsetNonZero = widget.initialHorizontalScrollOffset.abs() > 0.001;
+      
+      print('🔍 Debug delayed scroll check:');
+      print('   delayedHorizontalScroll: ${widget.delayedHorizontalScroll}');
+      print('   initialHorizontalScrollOffset: ${widget.initialHorizontalScrollOffset}');
+      print('   offset.abs(): ${widget.initialHorizontalScrollOffset.abs()}');
+      print('   offset != 0: ${widget.initialHorizontalScrollOffset != 0}');
+      print('   offset != 0.0: ${widget.initialHorizontalScrollOffset != 0.0}');
+      print('   offset.abs() > 0.001: ${widget.initialHorizontalScrollOffset.abs() > 0.001}');
+      print('   condition 1 (!= 0): ${widget.delayedHorizontalScroll && widget.initialHorizontalScrollOffset != 0}');
+      print('   condition 2 (!= 0.0): ${widget.delayedHorizontalScroll && widget.initialHorizontalScrollOffset != 0.0}');
+      print('   condition 3 (> 0.001): ${widget.delayedHorizontalScroll && isOffsetNonZero}');
+      
+      if (widget.delayedHorizontalScroll && widget.initialHorizontalScrollOffset != 0.0) {
         print('🔄 Delayed scroll enabled: ${widget.initialHorizontalScrollOffset}px, delay: ${widget.delayedHorizontalScrollDelay}ms');
         Future.delayed(Duration(milliseconds: widget.delayedHorizontalScrollDelay), () {
           print('⏰ Delayed scroll executing...');
