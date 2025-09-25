@@ -35,6 +35,8 @@ class EventsPlanner extends StatefulWidget {
     this.onVerticalScrollChange,
     this.initialHorizontalScrollOffset = 0,
     this.onHorizontalScrollChange,
+    this.delayedHorizontalScroll = false,
+    this.delayedHorizontalScrollDelay = 200,
     this.horizontalScrollPhysics = const BouncingScrollPhysics(
       decelerationRate: ScrollDecelerationRate.fast,
     ),
@@ -101,6 +103,12 @@ class EventsPlanner extends StatefulWidget {
 
   /// call when horizontal scroll change
   final void Function(double offset)? onHorizontalScrollChange;
+
+  /// enable delayed horizontal scroll after widget is built
+  final bool delayedHorizontalScroll;
+
+  /// delay in milliseconds before scrolling to initialHorizontalScrollOffset
+  final int delayedHorizontalScrollDelay;
 
   /// Horizontal day scroll physics
   final ScrollPhysics horizontalScrollPhysics;
@@ -170,9 +178,16 @@ class EventsPlannerState extends State<EventsPlanner> {
     initialDate =
         widget.initialDate?.withoutTime ?? widget.controller.focusedDay;
     currentIndex = 0;
-    mainHorizontalController = ScrollController(
-      initialScrollOffset: widget.initialHorizontalScrollOffset,
-    );
+
+    if (widget.delayedHorizontalScroll) {
+      // Don't set initial offset, will be set later with animation
+      mainHorizontalController = ScrollController();
+    } else {
+      // Set initial offset immediately
+      mainHorizontalController = ScrollController(
+        initialScrollOffset: widget.initialHorizontalScrollOffset,
+      );
+    }
     mainVerticalController = ScrollController(
       initialScrollOffset: widget.initialVerticalScrollOffset,
     );
@@ -234,6 +249,19 @@ class EventsPlannerState extends State<EventsPlanner> {
                 mainVerticalController.jumpTo(maxOffsetExtend);
               }
             }
+          }
+        });
+      }
+
+      // Delayed horizontal scroll
+      if (widget.delayedHorizontalScroll && widget.initialHorizontalScrollOffset > 0) {
+        Future.delayed(Duration(milliseconds: widget.delayedHorizontalScrollDelay), () {
+          if (mounted && mainHorizontalController.hasClients) {
+            mainHorizontalController.animateTo(
+              widget.initialHorizontalScrollOffset,
+              duration: Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
           }
         });
       }
