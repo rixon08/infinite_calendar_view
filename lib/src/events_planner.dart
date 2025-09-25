@@ -33,6 +33,8 @@ class EventsPlanner extends StatefulWidget {
     this.minVerticalScrollOffset,
     this.maxVerticalScrollOffset,
     this.onVerticalScrollChange,
+    this.initialHorizontalScrollOffset = 0,
+    this.onHorizontalScrollChange,
     this.horizontalScrollPhysics = const BouncingScrollPhysics(
       decelerationRate: ScrollDecelerationRate.fast,
     ),
@@ -93,6 +95,13 @@ class EventsPlanner extends StatefulWidget {
   /// call when vertical scroll change
   final void Function(double offset)? onVerticalScrollChange;
 
+  /// initial horizontal scroll offset (in pixels)
+  /// used to set the initial horizontal scroll position
+  final double initialHorizontalScrollOffset;
+
+  /// call when horizontal scroll change
+  final void Function(double offset)? onHorizontalScrollChange;
+
   /// Horizontal day scroll physics
   final ScrollPhysics horizontalScrollPhysics;
 
@@ -134,7 +143,7 @@ class EventsPlanner extends StatefulWidget {
 }
 
 class EventsPlannerState extends State<EventsPlanner> {
-  final mainHorizontalController = ScrollController();
+  late ScrollController mainHorizontalController;
   final headersHorizontalController = ScrollController();
   final topLeftCellValueNotifier = ValueNotifier<DateTime>(DateTime.now());
   late ScrollController mainVerticalController;
@@ -161,6 +170,9 @@ class EventsPlannerState extends State<EventsPlanner> {
     initialDate =
         widget.initialDate?.withoutTime ?? widget.controller.focusedDay;
     currentIndex = 0;
+    mainHorizontalController = ScrollController(
+      initialScrollOffset: widget.initialHorizontalScrollOffset,
+    );
     mainVerticalController = ScrollController(
       initialScrollOffset: widget.initialVerticalScrollOffset,
     );
@@ -189,6 +201,15 @@ class EventsPlannerState extends State<EventsPlanner> {
         mainVerticalController.position.isScrollingNotifier.addListener(() {
           if (!mainVerticalController.position.isScrollingNotifier.value) {
             widget.onVerticalScrollChange?.call(mainVerticalController.offset);
+          }
+        });
+      }
+
+      // init horizontal scroll listener when scroll stop
+      if (widget.onHorizontalScrollChange != null) {
+        mainHorizontalController.position.isScrollingNotifier.addListener(() {
+          if (!mainHorizontalController.position.isScrollingNotifier.value) {
+            widget.onHorizontalScrollChange?.call(mainHorizontalController.offset);
           }
         });
       }

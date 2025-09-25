@@ -11,6 +11,7 @@ import 'data.dart';
 import 'enumerations.dart';
 import 'views/events_list_view.dart';
 import 'views/events_planner_draggable_events_view.dart';
+import 'horizontal_scroll_test.dart';
 
 void main() {
   runApp(MyApp());
@@ -80,6 +81,17 @@ class _MyAppState extends State<MyApp> {
                 calendarMode: calendarMode,
                 controller: eventsController,
                 darkMode: darkMode),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const HorizontalScrollTest(),
+                  ),
+                );
+              },
+              child: const Icon(Icons.swap_horiz),
+              tooltip: 'Horizontal Scroll Test',
+            ),
           ),
         ),
       ),
