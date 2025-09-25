@@ -254,7 +254,7 @@ class EventsPlannerState extends State<EventsPlanner> {
       }
 
       // Delayed horizontal scroll
-      if (widget.delayedHorizontalScroll && widget.initialHorizontalScrollOffset > 0) {
+      if (widget.delayedHorizontalScroll && widget.initialHorizontalScrollOffset != 0) {
         print('🔄 Delayed scroll enabled: ${widget.initialHorizontalScrollOffset}px, delay: ${widget.delayedHorizontalScrollDelay}ms');
         Future.delayed(Duration(milliseconds: widget.delayedHorizontalScrollDelay), () {
           print('⏰ Delayed scroll executing...');
@@ -263,12 +263,23 @@ class EventsPlannerState extends State<EventsPlanner> {
           print('📊 Controller position: ${mainHorizontalController.position}');
           
           if (mounted && mainHorizontalController.hasClients) {
-            print('✅ Starting delayed scroll to: ${widget.initialHorizontalScrollOffset}px');
-            mainHorizontalController.animateTo(
-              widget.initialHorizontalScrollOffset,
-              duration: Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
+            // Check if target offset is within valid range
+            final targetOffset = widget.initialHorizontalScrollOffset;
+            final maxScrollExtent = mainHorizontalController.position.maxScrollExtent;
+            final minScrollExtent = mainHorizontalController.position.minScrollExtent;
+            
+            print('📊 Scroll range: $minScrollExtent to $maxScrollExtent');
+            print('📊 Target offset: $targetOffset');
+            
+            // Clamp the target offset to valid range
+            final clampedOffset = targetOffset.clamp(minScrollExtent, maxScrollExtent);
+            
+            if (clampedOffset != targetOffset) {
+              print('⚠️ Target offset clamped from $targetOffset to $clampedOffset');
+            }
+            
+            print('✅ Starting delayed scroll to: ${clampedOffset}px (no animation)');
+            mainHorizontalController.jumpTo(clampedOffset);
           } else {
             print('❌ Delayed scroll failed - mounted: $mounted, hasClients: ${mainHorizontalController.hasClients}');
           }

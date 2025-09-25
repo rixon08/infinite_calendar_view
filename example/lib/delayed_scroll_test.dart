@@ -57,9 +57,9 @@ class _DelayedScrollTestState extends State<DelayedScrollTest> {
                 ),
                 SizedBox(height: 8),
                 Text('Current Horizontal Offset: ${currentHorizontalOffset.toStringAsFixed(1)}px'),
-                Text('Target Offset: 500.0px'),
+                Text('Target Offset: -500.0px (negative)'),
                 Text('Delay: 200ms'),
-                Text('Animation Duration: 300ms'),
+                Text('Animation: None (jumpTo)'),
               ],
             ),
           ),
@@ -71,7 +71,7 @@ class _DelayedScrollTestState extends State<DelayedScrollTest> {
               daysShowed: 7,
               
               // Delayed scroll settings
-              initialHorizontalScrollOffset: 500.0,  // Target position
+              initialHorizontalScrollOffset: -500.0, // Target position (negative for testing)
               delayedHorizontalScroll: true,         // Enable delayed scroll
               delayedHorizontalScrollDelay: 200,     // Wait 200ms after build
               
@@ -94,26 +94,44 @@ class _DelayedScrollTestState extends State<DelayedScrollTest> {
           // Control buttons
           Container(
             padding: EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: Column(
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Test immediate scroll
-                    eventsController.updateCalendarData((calendarData) {
-                      // Force rebuild to test immediate scroll
-                    });
-                  },
-                  child: Text('Test Immediate'),
+                Text(
+                  'Test Different Scroll Values:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Test delayed scroll
-                    setState(() {
-                      // Force rebuild to test delayed scroll
-                    });
-                  },
-                  child: Text('Test Delayed'),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // Test negative scroll
+                        setState(() {
+                          // This will trigger rebuild with negative value
+                        });
+                      },
+                      child: Text('Test -500px'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Test positive scroll
+                        setState(() {
+                          // This will trigger rebuild with positive value
+                        });
+                      },
+                      child: Text('Test +500px'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Test zero scroll
+                        setState(() {
+                          // This will trigger rebuild with zero value
+                        });
+                      },
+                      child: Text('Test 0px'),
+                    ),
+                  ],
                 ),
               ],
             ),
