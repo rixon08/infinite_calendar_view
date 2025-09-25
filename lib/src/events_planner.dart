@@ -254,27 +254,14 @@ class EventsPlannerState extends State<EventsPlanner> {
       }
 
       // Delayed horizontal scroll
-      // Use more robust comparison for floating point numbers
-      final isOffsetNonZero = widget.initialHorizontalScrollOffset.abs() > 0.001;
-      
-      print('🔍 Debug delayed scroll check:');
-      print('   delayedHorizontalScroll: ${widget.delayedHorizontalScroll}');
-      print('   initialHorizontalScrollOffset: ${widget.initialHorizontalScrollOffset}');
-      print('   offset.abs(): ${widget.initialHorizontalScrollOffset.abs()}');
-      print('   offset != 0: ${widget.initialHorizontalScrollOffset != 0}');
-      print('   offset != 0.0: ${widget.initialHorizontalScrollOffset != 0.0}');
-      print('   offset.abs() > 0.001: ${widget.initialHorizontalScrollOffset.abs() > 0.001}');
-      print('   condition 1 (!= 0): ${widget.delayedHorizontalScroll && widget.initialHorizontalScrollOffset != 0}');
-      print('   condition 2 (!= 0.0): ${widget.delayedHorizontalScroll && widget.initialHorizontalScrollOffset != 0.0}');
-      print('   condition 3 (> 0.001): ${widget.delayedHorizontalScroll && isOffsetNonZero}');
       
       if (widget.delayedHorizontalScroll && widget.initialHorizontalScrollOffset != 0.0) {
-        print('🔄 Delayed scroll enabled: ${widget.initialHorizontalScrollOffset}px, delay: ${widget.delayedHorizontalScrollDelay}ms');
+        // print('🔄 Delayed scroll enabled: ${widget.initialHorizontalScrollOffset}px, delay: ${widget.delayedHorizontalScrollDelay}ms');
         Future.delayed(Duration(milliseconds: widget.delayedHorizontalScrollDelay), () {
-          print('⏰ Delayed scroll executing...');
-          print('📊 Widget mounted: $mounted');
-          print('📊 Controller has clients: ${mainHorizontalController.hasClients}');
-          print('📊 Controller position: ${mainHorizontalController.position}');
+          // print('⏰ Delayed scroll executing...');
+          // print('📊 Widget mounted: $mounted');
+          // print('📊 Controller has clients: ${mainHorizontalController.hasClients}');
+          // print('📊 Controller position: ${mainHorizontalController.position}');
           
           if (mounted && mainHorizontalController.hasClients) {
             // Check if target offset is within valid range
@@ -282,24 +269,24 @@ class EventsPlannerState extends State<EventsPlanner> {
             final maxScrollExtent = mainHorizontalController.position.maxScrollExtent;
             final minScrollExtent = mainHorizontalController.position.minScrollExtent;
             
-            print('📊 Scroll range: $minScrollExtent to $maxScrollExtent');
-            print('📊 Target offset: $targetOffset');
+            // print('📊 Scroll range: $minScrollExtent to $maxScrollExtent');
+            // print('📊 Target offset: $targetOffset');
             
             // Clamp the target offset to valid range
             final clampedOffset = targetOffset.clamp(minScrollExtent, maxScrollExtent);
             
             if (clampedOffset != targetOffset) {
-              print('⚠️ Target offset clamped from $targetOffset to $clampedOffset');
+              // print('⚠️ Target offset clamped from $targetOffset to $clampedOffset');
             }
             
-            print('✅ Starting delayed scroll to: ${clampedOffset}px (no animation)');
+            // print('✅ Starting delayed scroll to: ${clampedOffset}px (no animation)');
             mainHorizontalController.jumpTo(clampedOffset);
           } else {
-            print('❌ Delayed scroll failed - mounted: $mounted, hasClients: ${mainHorizontalController.hasClients}');
+            // print('❌ Delayed scroll failed - mounted: $mounted, hasClients: ${mainHorizontalController.hasClients}');
           }
         });
       } else {
-        print('ℹ️ Delayed scroll not enabled - delayedHorizontalScroll: ${widget.delayedHorizontalScroll}, initialHorizontalScrollOffset: ${widget.initialHorizontalScrollOffset}');
+        // print('ℹ️ Delayed scroll not enabled - delayedHorizontalScroll: ${widget.delayedHorizontalScroll}, initialHorizontalScrollOffset: ${widget.initialHorizontalScrollOffset}');
       }
 
       // listen keyboard for zoom in web/desktop
