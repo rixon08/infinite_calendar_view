@@ -9,6 +9,10 @@ import 'package:infinite_calendar_view/infinite_calendar_view.dart';
 import 'app_bar.dart';
 import 'data.dart';
 import 'enumerations.dart';
+import 'simple_diagonal_test.dart';
+import 'performance_test.dart';
+import 'diagonal_debug_test.dart';
+import 'simple_wrapper_test.dart';
 import 'views/events_list_view.dart';
 import 'views/events_planner_draggable_events_view.dart';
 
@@ -80,6 +84,62 @@ class _MyAppState extends State<MyApp> {
                 calendarMode: calendarMode,
                 controller: eventsController,
                 darkMode: darkMode),
+            floatingActionButton: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const SimpleWrapperTest(),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.wrap_text),
+                  tooltip: 'Simple Wrapper Test',
+                  heroTag: "wrapper",
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const DiagonalDebugTest(),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.bug_report),
+                  tooltip: 'Debug Diagonal Test',
+                  heroTag: "debug",
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const PerformanceTest(),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.speed),
+                  tooltip: 'Performance Test',
+                  heroTag: "performance",
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const SimpleDiagonalTest(),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.touch_app),
+                  tooltip: 'Simple Diagonal Test',
+                  heroTag: "simple",
+                ),
+              ],
+            ),
           ),
         ),
       ),

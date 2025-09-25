@@ -13,6 +13,7 @@ import 'events/event_arranger.dart';
 import 'events/side_events_arranger.dart';
 import 'utils/extension.dart';
 import 'widgets/planner/day_widget.dart';
+import 'widgets/planner/optimized_diagonal_scroll_wrapper.dart';
 import 'widgets/planner/horizontal_days_indicator_widget.dart';
 import 'widgets/planner/horizontal_full_day_events_widget.dart';
 import 'widgets/planner/vertical_time_indicator_widget.dart';
@@ -47,6 +48,9 @@ class EventsPlanner extends StatefulWidget {
     this.offTimesParam = const OffTimesParam(),
     this.pinchToZoomParam = const PinchToZoomParameters(),
     this.fullDayParam = const FullDayParam(),
+    this.enableDiagonalScroll = false,
+    this.diagonalScrollSensitivity = 1.0,
+    this.diagonalScrollParam = const DiagonalScrollParam(),
   });
 
   /// data controller
@@ -129,6 +133,15 @@ class EventsPlanner extends StatefulWidget {
   // full day parameters
   final FullDayParam fullDayParam;
 
+  /// Enable diagonal scroll functionality
+  final bool enableDiagonalScroll;
+
+  /// Sensitivity of diagonal scroll (1.0 = normal, 2.0 = double speed)
+  final double diagonalScrollSensitivity;
+
+  /// Diagonal scroll parameters
+  final DiagonalScrollParam diagonalScrollParam;
+
   @override
   State createState() => EventsPlannerState();
 }
@@ -152,6 +165,7 @@ class EventsPlannerState extends State<EventsPlanner> {
   var _plannerPointerDownCount = 0;
   var _isKeyboardZoomActive = false;
   var _startColumnIndex = 0;
+  var _isDiagonalScrolling = false;
 
   @override
   void initState() {
@@ -188,6 +202,7 @@ class EventsPlannerState extends State<EventsPlanner> {
       if (widget.onVerticalScrollChange != null) {
         mainVerticalController.position.isScrollingNotifier.addListener(() {
           if (!mainVerticalController.position.isScrollingNotifier.value) {
+            debugPrint('⏰ VERTICAL SCROLL: Time changed to offset ${mainVerticalController.offset.toStringAsFixed(1)}');
             widget.onVerticalScrollChange?.call(mainVerticalController.offset);
           }
         });
@@ -240,6 +255,7 @@ class EventsPlannerState extends State<EventsPlanner> {
         if (index != currentIndex) {
           currentIndex = index;
           var currentDay = initialDate.add(Duration(days: currentIndex));
+          debugPrint('📅 HORIZONTAL SCROLL: Day changed to ${currentDay.day}/${currentDay.month}/${currentDay.year}');
           widget.onDayChange?.call(currentDay);
           widget.controller.updateFocusedDay(currentDay);
           topLeftCellValueNotifier.value = currentDay;
@@ -380,18 +396,32 @@ class EventsPlannerState extends State<EventsPlanner> {
         onPointerUp: canZoom ? (event) => _onPointerUp() : null,
         child: IgnorePointer(
           ignoring: canZoom ? _plannerPointerDownCount > 1 : false,
-          child: ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context).copyWith(
-              scrollbars: false,
-              dragDevices: PointerDeviceKind.values.toSet(),
-            ),
-            child: CustomScrollView(
-              physics: canZoom &&
-                      (_plannerPointerDownCount > 1 || _isKeyboardZoomActive)
-                  ? const NeverScrollableScrollPhysics()
-                  : widget.verticalScrollPhysics,
-              controller: mainVerticalController,
-              slivers: [
+          child: OptimizedDiagonalScrollWrapper(
+            horizontalController: mainHorizontalController,
+            verticalController: mainVerticalController,
+            enableDiagonalScroll: widget.enableDiagonalScroll,
+            diagonalScrollSensitivity: widget.diagonalScrollSensitivity,
+            gestureConflictResolution: widget.diagonalScrollParam.gestureConflictResolution,
+            pinchToZoomPriority: widget.diagonalScrollParam.pinchToZoomPriority,
+            dragEventPriority: widget.diagonalScrollParam.dragEventPriority,
+            tapEventThreshold: widget.diagonalScrollParam.tapEventThreshold,
+            tapEventDuration: widget.diagonalScrollParam.tapEventDuration,
+            enableDebugLogs: true, // Enable debug logs for troubleshooting
+            onDiagonalScrollStart: _onDiagonalScrollStart,
+            onDiagonalScrollUpdate: _onDiagonalScrollUpdate,
+            onDiagonalScrollEnd: _onDiagonalScrollEnd,
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                scrollbars: false,
+                dragDevices: PointerDeviceKind.values.toSet(),
+              ),
+              child: CustomScrollView(
+                physics: canZoom &&
+                        (_plannerPointerDownCount > 1 || _isKeyboardZoomActive || _isDiagonalScrolling)
+                    ? const NeverScrollableScrollPhysics()
+                    : widget.verticalScrollPhysics,
+                controller: mainVerticalController,
+                slivers: [
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     childCount: 1,
@@ -429,6 +459,7 @@ class EventsPlannerState extends State<EventsPlanner> {
                 )
               ],
             ),
+            ),
           ),
         ),
       ),
@@ -441,7 +472,7 @@ class EventsPlannerState extends State<EventsPlanner> {
     double plannerHeight,
     Color currentHourIndicatorColor,
   ) {
-    var physics = _plannerPointerDownCount > 1
+    var physics = (_plannerPointerDownCount > 1 || _isDiagonalScrolling)
         ? const NeverScrollableScrollPhysics()
         : widget.horizontalScrollPhysics;
 
@@ -605,6 +636,36 @@ class EventsPlannerState extends State<EventsPlanner> {
     setState(() {
       _plannerPointerDownCount--;
     });
+  }
+
+  void _onDiagonalScrollStart() {
+    setState(() {
+      _isDiagonalScrolling = true;
+    });
+    
+    // Disable automatic scroll adjustment during diagonal scroll
+    _listenHorizontalScrollDayChange = false;
+    
+    debugPrint('🎯 EVENTS PLANNER: Diagonal scroll started');
+  }
+
+  void _onDiagonalScrollUpdate(double horizontalDelta, double verticalDelta) {
+    // Optional: Add custom logic for diagonal scroll update
+    // For example, you could add haptic feedback or custom animations
+    debugPrint('🔄 EVENTS PLANNER: Diagonal scroll update (H=${horizontalDelta.toStringAsFixed(1)}, V=${verticalDelta.toStringAsFixed(1)})');
+  }
+
+  void _onDiagonalScrollEnd() {
+    setState(() {
+      _isDiagonalScrolling = false;
+    });
+    
+    // Re-enable automatic scroll adjustment after diagonal scroll
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _listenHorizontalScrollDayChange = true;
+    });
+    
+    debugPrint('🏁 EVENTS PLANNER: Diagonal scroll ended');
   }
 
   void updateHeightPerMinute(double heightPerMinute) {
@@ -979,4 +1040,29 @@ class DayParam {
     DateTime exactDateTime,
     DateTime roundDateTime,
   )? onSlotDoubleTap;
+}
+
+class DiagonalScrollParam {
+  const DiagonalScrollParam({
+    this.gestureConflictResolution = true,
+    this.pinchToZoomPriority = true,
+    this.dragEventPriority = true,
+    this.tapEventThreshold = 10.0,
+    this.tapEventDuration = 200,
+  });
+
+  /// Enable gesture conflict resolution between diagonal scroll and other gestures
+  final bool gestureConflictResolution;
+
+  /// Give priority to pinch-to-zoom over diagonal scroll
+  final bool pinchToZoomPriority;
+
+  /// Give priority to drag events over diagonal scroll
+  final bool dragEventPriority;
+
+  /// Threshold distance for tap event detection (in pixels)
+  final double tapEventThreshold;
+
+  /// Maximum duration for tap event detection (in milliseconds)
+  final int tapEventDuration;
 }
