@@ -255,15 +255,26 @@ class EventsPlannerState extends State<EventsPlanner> {
 
       // Delayed horizontal scroll
       if (widget.delayedHorizontalScroll && widget.initialHorizontalScrollOffset > 0) {
+        print('🔄 Delayed scroll enabled: ${widget.initialHorizontalScrollOffset}px, delay: ${widget.delayedHorizontalScrollDelay}ms');
         Future.delayed(Duration(milliseconds: widget.delayedHorizontalScrollDelay), () {
+          print('⏰ Delayed scroll executing...');
+          print('📊 Widget mounted: $mounted');
+          print('📊 Controller has clients: ${mainHorizontalController.hasClients}');
+          print('📊 Controller position: ${mainHorizontalController.position}');
+          
           if (mounted && mainHorizontalController.hasClients) {
+            print('✅ Starting delayed scroll to: ${widget.initialHorizontalScrollOffset}px');
             mainHorizontalController.animateTo(
               widget.initialHorizontalScrollOffset,
               duration: Duration(milliseconds: 300),
               curve: Curves.easeInOut,
             );
+          } else {
+            print('❌ Delayed scroll failed - mounted: $mounted, hasClients: ${mainHorizontalController.hasClients}');
           }
         });
+      } else {
+        print('ℹ️ Delayed scroll not enabled - delayedHorizontalScroll: ${widget.delayedHorizontalScroll}, initialHorizontalScrollOffset: ${widget.initialHorizontalScrollOffset}');
       }
 
       // listen keyboard for zoom in web/desktop

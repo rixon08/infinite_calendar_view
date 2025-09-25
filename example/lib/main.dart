@@ -8,6 +8,7 @@ import 'package:infinite_calendar_view/infinite_calendar_view.dart';
 
 import 'app_bar.dart';
 import 'data.dart';
+import 'delayed_scroll_test.dart';
 import 'enumerations.dart';
 import 'views/events_list_view.dart';
 import 'views/events_planner_draggable_events_view.dart';
@@ -81,16 +82,35 @@ class _MyAppState extends State<MyApp> {
                 calendarMode: calendarMode,
                 controller: eventsController,
                 darkMode: darkMode),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const HorizontalScrollTest(),
-                  ),
-                );
-              },
-              child: const Icon(Icons.swap_horiz),
-              tooltip: 'Horizontal Scroll Test',
+            floatingActionButton: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const DelayedScrollTest(),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.schedule),
+                  tooltip: 'Delayed Scroll Test',
+                  heroTag: 'delayed_scroll',
+                ),
+                SizedBox(height: 10),
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const HorizontalScrollTest(),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.swap_horiz),
+                  tooltip: 'Horizontal Scroll Test',
+                  heroTag: 'horizontal_scroll',
+                ),
+              ],
             ),
           ),
         ),
