@@ -674,9 +674,11 @@ class EventsPlannerState extends State<EventsPlanner> {
   }
 
   void _onPointerUp() {
-    setState(() {
-      _plannerPointerDownCount--;
-    });
+    if (mounted) {
+      setState(() {
+        _plannerPointerDownCount--;
+      });
+    }
   }
 
   void updateHeightPerMinute(double heightPerMinute) {
